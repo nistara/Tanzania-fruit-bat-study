@@ -1,0 +1,265 @@
+---
+title: "Classifying e-obs acceleration & GPS data into flying/not-flying"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    theme: cerulean
+    highlight: zenburn
+---
+
+
+
+# Set workspace
+
+```{r global_options, include=FALSE}
+
+# Global options
+# fig_path = "Rmd_output"
+# if( !dir.exists(fig_path)) dir.create(fig.path)
+
+knitr::opts_chunk$set(fig.width=12, fig.height=8,
+                      # fig.path=fig_path,
+                      echo=TRUE, warning=FALSE, message=FALSE)
+
+options(DT.options = list(pageLength = 25,
+                          dom = 'Btip',
+                          filter = "top",
+                          extensions = 'Buttons',
+                          buttons = c('copy', 'csv')))
+
+
+```
+
+
+```{r}
+
+# ==============================================================================
+# Work with gps data downloaded from movebank
+# ==============================================================================
+
+# Download method:
+# ---------------
+# Go to: https://www.movebank.org/panel_embedded_movebank_webapp
+# Click on Studies on the menu bar on the left side of the viewer
+# Choose my study
+# Click on Download data
+# Choose: csv, include undeployed locations,
+#         add UTM coordinates, add study local time
+#         (see screenshot)
+# Download above for both gps and acceleration data
+#
+# NOTE: Don't open downloaded files in excel, because it's somehow corrupting
+#       the date column, making it difficult for R to read it correctly
+
+
+
+# ==============================================================================
+# * Environment
+# ==============================================================================
+source("R/00_fxns.R")
+
+library(maptools)
+library(move)
+library(dplyr)
+library(data.table)
+
+```
+
+# Import acceleration and GPS data
+
+```{r import-data}
+
+ACC_file = file.path("data/raw/e-obs", "movebank_acc.csv") # acc file
+GPS_file = file.path("data/raw/e-obs", "movebank_gps.csv") # gps file
+crop_file = file.path("data/raw/bats", "eobs_info.csv") # time-crop file
+
+out_dir = "data/acc_behavL/"
+if( !dir.exists(out_dir)) dir.create(out_dir)
+
+out_filename = "acc_gps_behavL.RDS" # the axis info is appended to this filename
+
+axises = c("xy", "xz", "yz", "xyz") # choose one or as many options as you want
+
+# ==============================================================================
+# * Read in acceleration and GPS data
+# ==============================================================================
+
+# read in the acceleration data
+accALL = read.csv(ACC_file, stringsAsFactors = FALSE)
+
+# read in the gps data and assign local timestamp as main one
+gpsALL = read.csv(GPS_file, stringsAsFactors = FALSE)
+
+# read in csv with timestamp-crop data
+time_crop = read.csv(crop_file, stringsAsFactors = FALSE)
+
+```
+
+# Prepare acceleration and GPS data 
+
+```{r, eval = TRUE, results = 'hide'}
+
+# ==============================================================================
+# * Get acceleration and GPS data ready for processing
+# ==============================================================================
+
+# ** crop ACC anf GPS data to retain bat-specific data
+# ------------------------------------------------------------------------------
+# This also removes data for tags 5314 & 5326, which had very sparse data
+tags = unique(time_crop$tagID)
+
+accALL = lapply(tags, function(ID, time_crop, accALL) {
+    df = accALL[ accALL$tag.local.identifier %in% ID, ]
+    start_ts = time_crop$start_ts_UTC[ time_crop$tagID %in% ID ]
+    stop_ts = time_crop$stop_ts_UTC[ time_crop$tagID %in% ID ]
+    df[ df$timestamp >= start_ts &
+        df$timestamp < stop_ts, ]
+}, time_crop, accALL) %>%
+    rbindlist
+
+
+gpsALL = lapply(tags, function(ID, time_crop, gpsALL) {
+    df = gpsALL[ gpsALL$tag.local.identifier %in% ID, ]
+    start_ts = time_crop$start_ts_UTC[ time_crop$tagID %in% ID ]
+    stop_ts = time_crop$stop_ts_UTC[ time_crop$tagID %in% ID ]
+    df[ df$timestamp >= start_ts &
+        df$timestamp < stop_ts, ]
+}, time_crop, gpsALL) %>%
+    rbindlist
+
+
+
+# ** switch timestamp to local time and backup original to eobs.timestamp
+# ------------------------------------------------------------------------------
+accALL$eobs.timestamp = accALL$timestamp
+accALL$timestamp = accALL$study.local.timestamp
+
+gpsALL$eobs.timestamp = gpsALL$timestamp
+gpsALL$timestamp = gpsALL$study.local.timestamp
+
+# tell R what the local timestamp format is
+accALL$timestamp = as.POSIXct(accALL$timestamp, format="%Y-%m-%d %H:%M:%OS",
+                              tz="Africa/Dar_es_Salaam")
+
+gpsALL$timestamp = as.POSIXct(gpsALL$timestamp, format="%Y-%m-%d %H:%M:%OS",
+                              tz="Africa/Dar_es_Salaam")
+
+
+# ** populate the individual local identifier column with tag ID info
+# ------------------------------------------------------------------------------
+# (needed by the move package)
+accALL$tagID = paste0("K", accALL$tag.local.identifier)
+gpsALL$tagID = paste0("K", gpsALL$tag.local.identifier)
+
+
+# ** for GPS data, keep those with status "A", which is the good quality data
+# ------------------------------------------------------------------------------
+gpsALL = gpsALL[ gpsALL$eobs.status %in% "A", ]
+
+
+# ** make a list of acceleration & gps data
+# ------------------------------------------------------------------------------
+accL = split(accALL, accALL$tagID)
+gpsL = split(gpsALL, gpsALL$tagID)
+
+# check if individuals names are the same in acc file as in the move object
+identical(sort(names(gpsL)), sort(names(accL))) 
+
+```
+	
+# Classify acceleration & GPS data to flying or not-flying
+
+## Acc burst classification rationale
+Acceleration burst data is one long string of acc recordings along 3-axes: X, Y, and Z.
+With an ACC BYTE COUNT of 1135 bytes, the each ACC burst corresponds to 792 sequential recordings along the X, Y, and Z axes. 
+
+E.g. a reading of an acc burst:
+
+```{r acc-explanation, eval = TRUE}
+
+accL[[1]]$eobs.accelerations.raw[1]
+
+```
+
+Going forward, with each acc burst we extract individual readings using `strsplit` by `space`, and create a matrix of the transposed acc readings such that each row corresponds to an individual acc burst, and each column represents the sample number within the burst, for a total of 792 columns. We then extract every first, second, and third column to get subsets of data corresponding to only X, Y, or Z readings. 
+
+
+### E.g. using hypothetical data with 9 readings for each burst
+
+```{r acc-eg, eval = TRUE}
+
+acc_gen = function() paste0(sample(1:200, 9), c("x", "y", "z"), collapse = " ")
+    
+acc_df = data.frame(acc = c(acc_gen(), acc_gen(), acc_gen()),
+                stringsAsFactors = FALSE)
+
+acc_df
+
+acc_df2 = strsplit(acc_df$acc, split = " ", fixed = TRUE) 
+acc_matrix = matrix(unlist(acc_df2), ncol = 9, byrow = TRUE) 
+colnames(acc_matrix) = paste0("V", 1:9)
+
+acc_matrix
+
+# X axis readings
+acc_matrix[, seq(1, 9, 3)]
+
+# Y axis readings
+acc_matrix[, seq(2, 9, 3)]
+
+# Z axis readings
+acc_matrix[, seq(3, 9, 3)]
+
+```
+
+Once we subset the acc readings by each axis, we can calculate the variance of each burst's readings and do a k-cluster analyses to classify acc bursts by activity (flying vs. not flying).
+
+
+## Check lengths of acc bursts
+	
+Based on the tag settings, our ACC BYTE COUNT was 1135 bytes, i.e. 792 ACC samples would be collected at each burst. 
+
+```{r, eval = TRUE}
+
+# Determining lengths of samples per acc burst
+accaxesL = sapply(accL, function(acc) {
+    accaxes = strsplit(as.character(acc$eobs.accelerations.raw),
+                       split=" ", fixed=T) 
+    paste0(sort(unique(sapply(accaxes, length))), collapse = ", ")
+})
+
+data.frame(tagID = names(accaxesL), numberSamples = accaxesL) %>%
+    mutate(row.names = NULL)
+
+```
+
+
+## Classification process
+
+The functions used below have been built upon code by Abedi-Lartey et al.:
+
+Abedi-Lartey M, Dechmann DKN, Wikelski M, Scharf AK, Fahr J. Long-distance seed dispersal by straw-coloured fruit bats varies by season and landscape. Global Ecology and Conservation. 2016;7:12–24. Available from: https://doi.org/10.1016/j.gecco.2016.03.005
+
+```{r acc-classify, eval = TRUE, results = 'hide'}
+
+numberSamples = 792
+
+for( axis in axises) {
+    acc_activityL = lapply(accL, get_acc_activity, numberSamples = 792, axis = axis)
+    tagIDs = names(acc_activityL)
+    acc_gps_behavL = lapply(tagIDs, get_acc_gps_behav, acc_activityL, gpsL)
+    names(acc_gps_behavL) = tagIDs
+
+    # save data
+    saveRDS(acc_gps_behavL, file.path(out_dir, paste0(axis, "_", out_filename)))
+}
+
+
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```

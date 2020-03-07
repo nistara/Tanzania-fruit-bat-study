@@ -1,0 +1,49 @@
+
+```{r}
+
+library(leaflet)
+library(data.table)
+
+gps_pts = readRDS("data/gps_forage.RDS") %>%
+    rbindlist()
+forage_pts = gps_pts[ gps_pts$forage_pts, ]
+roosts = gps_pts[ gps_pts$roost %in% "new", ]
+sites = read.csv("data/raw/bats/sites_visited.csv", stringsAsFactors = FALSE)
+
+gps_sites = gps_pts[ gps_pts$location.lat %in% sites$lat &
+                     gps_pts$location.long %in% sites$long,
+                    c("location.lat", "location.long",
+                      "activity", "forage_pts", "roost")]
+
+gps_sites %>%
+    arrange(location.lat, location.long)
+
+sites %>%
+    arrange(lat, long)
+
+greenLeafIcon <- makeIcon(
+  iconUrl = "http://leafletjs.com/examples/custom-icons/leaf-green.png",
+  iconWidth = 38, iconHeight = 95,
+  iconAnchorX = 22, iconAnchorY = 94,
+)
+
+map = leaflet() %>%
+    addTiles() %>%
+    # addCircles(data = gps_pts, lat = gps_pts$location.lat, lng = gps_pts$location.long,
+               # radius = 1) %>%
+    addCircleMarkers(data = forage_pts,
+                     lat = ~location.lat, lng = ~location.long,
+                     radius = 3, color = "yellow") %>%
+    addCircleMarkers(data = roosts,
+                     lat = ~location.lat, lng = ~location.long,
+                     radius = 3, color = "orange", group = "roosts") %>%
+    addCircleMarkers(data = sites, lat = ~lat, lng = ~long, popup = ~sites$site,
+               color = "blue", radius = 3,
+                              # icon = greenLeafIcon,
+               group = "sites")
+    
+map %>% addLayersControl(overlayGroups = c("roosts", "sites"),
+                       options = layersControlOptions(collapsed = FALSE))
+
+    
+```

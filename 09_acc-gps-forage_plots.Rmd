@@ -1,0 +1,284 @@
+---
+title: "Identify roosts further subset flying points"
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+    theme: cerulean
+    highlight: zenburn
+---
+
+# Setting up the workspace
+	
+```{r global_options, include=FALSE}
+ 
+ # Global options
+ knitr::opts_chunk$set(
+                       # fig.width = 12,
+                       # fig.path=fig.path,
+                       echo=TRUE, warning=FALSE, message=FALSE)
+
+ options(DT.options = list(pageLength = 25,
+                           dom = 'Btip',
+                           filter = "top",
+                           extensions = 'Buttons',
+                           buttons = c('copy', 'csv')))
+
+
+```
+
+
+```{r set-up}
+
+# ==============================================================================
+# * Libraries
+# ==============================================================================
+
+library(move)
+library(maptools)
+library(sp)
+library(rgdal)
+library(rgeos)
+library(adehabitatLT)
+library(lubridate)
+library(dplyr)
+library(data.table)
+library(leaflet)
+library(htmlwidgets)
+library(adehabitatHR)
+library(sf)
+library(ggplot2)
+library(patchwork)
+library(ggsn)
+library(hrbrthemes)
+library(DT)
+library(viridis)
+library(tidyr)
+library(here)
+library(plotly)
+library(cowplot)
+
+source("R/00_fxns.R")
+
+# Directory for saving plots and KDE information
+plot_out_dir = file.path("results", "figs")
+
+```
+
+# Plot gps
+```{r}
+# ==============================================================================
+# * Read in GPS data with flying behaviour + tagging location
+# ==============================================================================
+# read in the behavior-classified acc and GPS data
+gps_forage = readRDS("data/gps_forage.RDS")
+
+df = gps_forage$K5309 %>%
+    filter(time_cut %in% 3)
+
+kilombero_wgs = data.frame(site = "kilombero",
+                           lon = 36.98726,
+                           lat = -7.662083)
+
+
+df_sf = df %>%
+    st_as_sf(coords = c("utm.easting", "utm.northing"), crs = 32737)
+
+df_sp = as(df_sf, 'Spatial')
+
+map_extent = extent(df_sp) %>%
+    as('SpatialPolygons') %>%
+    st_as_sf %>%
+    st_set_crs(st_crs(df_sp)) %>%
+    st_buffer(100) %>%
+    st_transform(crs = 4326)
+
+
+g = ggplot() +
+    geom_sf(data = map_extent, fill = NA, color = NA) +
+    geom_path(data = df, aes(x = location.long, y = location.lat),
+              size = 0.25, color = "#8C0C53") +
+    geom_point(data = df, aes(x = location.long, y = location.lat, color = "#8C0C53"),
+             size = 2.5, alpha = 1) +
+    geom_point(data = df[ df$activity %in% "NotFlying", ],
+               aes(x = location.long, y = location.lat, color = "#F2CB70"),
+               size = 2.5, alpha = 1)
+
+g_forage = g +
+        geom_point(data = df[ df$forage_pts, ],
+                   aes(x = location.long, y = location.lat, color = "black"),
+                   size = 1, alpha = 1)
+
+    
+g_forage = g_forage +
+    geom_point(data = kilombero_wgs, aes(x = lon, y = lat, color = "roost"),
+               size = 4, alpha = 1) +
+    scale_colour_manual(name = "", 
+                        values =c('#8C0C53'='#8C0C53',
+                                  "#F2CB70" = "#F2CB70",
+                                  "black" = "black",
+                                  "roost" = "#2C7BB7"),
+                        labels = c(
+                                     "Flying",
+                                     "Not Flying",
+                                     "Foraging area/\nFeeding roost",
+                                     "Colony location"))
+
+
+g_forage = g_forage + 
+    theme_ipsum(base_size = 14,
+                plot_title_size = 14,
+                grid = FALSE,
+                axis = FALSE, ticks = TRUE,
+                axis_text_size = 11,
+                axis_title_size = 12) +
+    theme(legend.position="top") +
+    scalebar(map_extent,
+             dist = 4,
+             dist_unit = "km",
+             transform = TRUE,
+             model = "WGS84",
+             location = "bottomright",
+             height = 0.01,
+             st.dist = 0.025,
+             st.size = 4,
+             box.fill = c("white", "black"),
+             box.color = "black",
+             border.size = 0.25) +
+    xlab("Longitude") +
+    ylab("Latitude")
+
+
+g_forage
+
+# ggsave("results/figs/5309_day3_gps.png", g_forage, dpi = 600)
+cowplot::save_plot("results/figs/5309_day3_gps.png",
+                   g_forage, base_height = 7, dpi = 600)
+
+# ==============================================================================
+# * gps acc
+# ==============================================================================
+silent = FALSE # for lapply to run silently
+sparse = FALSE # to plot a sample of the entire acc readings
+sample_size = 5000
+
+plot_info = readRDS("data/acc-gps_plot-info_yz.RDS")
+
+ID = "K5309"
+
+acc_df = plot_info[[ ID ]]$acc_df
+acc_plot = plot_info[[ ID ]]$acc_plot
+day_info = plot_info[[ ID ]]$day_info
+gps_acc_N = plot_info[[ ID ]]$gps_acc_N
+
+# Max value of any axis reading
+max_y = max(acc_plot$value + 50, na.rm = TRUE)
+
+# Get x axis labels
+x_lab = data.frame(n = c(day_info$start_n, day_info$end_n),
+                   timestamp = c(day_info$start_ts, day_info$end_ts))
+
+x_lab = x_lab[ order(x_lab$n), ]
+
+
+x_lab$label = paste0(lubridate::month(x_lab$timestamp, label = TRUE),
+                     lubridate::day(x_lab$timestamp),
+                     "\n",
+                     format(x_lab$timestamp, "%H:%M"))
+
+
+tdiff = difftime(x_lab$timestamp, lag(x_lab$timestamp), units = "hours")
+x_lab = x_lab[ tdiff >= 10 | is.na(tdiff), ]
+
+
+    # Subset acc_df for test plots
+    if(sparse) {
+
+        s = sample(1:nrow(acc_plot), size = sample_size)
+        acc_plot = acc_plot[ s, ]
+
+    }
+
+
+p = ggplot() +
+    geom_rect(data = day_info,
+              aes(xmin = start_n, xmax = end_n,
+                  ymin = 0, ymax = max_y,
+                  text = "Day"),
+              fill = "#F2F2F2") + 
+    geom_line(data = acc_plot,
+              aes(x = n, y = value,
+                  group = axis,
+                  color = axis,
+                  text = paste0(activity, "\n", timestamp)),
+              alpha = 0.6) +
+    scale_color_manual(values=c("#D55E00", "#009E73", "#0072B2"),
+                       labels = c("X", "Y", "Z")) +
+    theme_ipsum(base_size = 12,
+                base_family = "Helvetica",
+                grid = FALSE,
+                axis_col = "#919191", axis = TRUE, ticks = TRUE) +
+    scale_x_continuous(breaks = x_lab$n,
+                       labels = x_lab$label) +
+    ggtitle("") +
+    labs(color = "Acceleration axis") +
+    ylab("Acceleration\nreading") +
+    xlab("Time") +
+    theme(axis.title.y = element_text(angle = 0, hjust = 0, vjust = 0.5),
+          legend.position = "bottom")
+
+static_p = p +  geom_segment(data = gps_acc_N[ gps_acc_N$activity %in% "NotFlying"],
+                             aes(x = n,
+                                 y = (max_y + 50),
+                                 xend = n,
+                                 yend = (max_y + 200),
+                                 text = paste0(activity, "\n", timestamp)),
+                             color = "#F2CB70") +
+    geom_segment(data = gps_acc_N[ gps_acc_N$activity %in% "Flying"],
+                 aes(x = n,
+                     y = (max_y + 50),
+                     xend = n,
+                     yend = (max_y + 200),
+                     text = paste0(activity, "\n", timestamp)),
+                 color =  "#8C0C53") 
+
+
+gps_l = data.frame(activity = c("GPS: Flying", "GPS: Not Flying"), n = 2) %>%
+    ggplot(aes(activity, fill = activity)) +
+    geom_bar() + scale_fill_manual(values=c("#8C0C53", "#F2CB70")) +
+    theme(legend.position = "top",
+          legend.justification='right',
+          legend.key.size = unit(0.2, "cm"),
+          legend.text=element_text(size = 10, family = "Helvetica")) +
+    labs(fill = "")
+
+gps_l = get_legend(gps_l)
+
+day_l = data.frame(activity = "Day time", n = 2) %>%
+    ggplot(aes(x = activity, fill = activity))+
+    geom_bar() + scale_fill_manual(values="#F2F2F2") +
+    theme(legend.position = "top",
+          legend.justification='left',
+          legend.key.size = unit(0.2, "cm"),
+          legend.key.width = unit(0.6, "cm"),
+          legend.text=element_text(size = 12, family = "Helvetica")) +
+    labs(fill = "")
+
+day_l = get_legend(day_l)
+
+
+final_p = static_p +
+    annotation_custom(grob = day_l, ymin = max_y + 350) +
+    annotation_custom(grob = gps_l, ymin = max_y + 350)
+
+final_p
+
+# ggsave("results/figs/5309_day3_acc_.png", final_p, dpi = 600)
+cowplot::save_plot("results/figs/5309_day3_acc.png",
+                   final_p, base_height = 6, dpi = 600)
+
+```
+
+```{r}
+sessionInfo()
+```
