@@ -1,4 +1,4 @@
-# Tanzania-fruit-bat-study
+# Code for paper
 
 
 1. [Classification of GPS fixes using aceleration data](https://nistara.github.io/Tanzania-fruit-bat-study/01_eobs-classify-acc-gps.html) 
