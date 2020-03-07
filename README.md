@@ -13,7 +13,7 @@
 
 6. [Determination of foraging/feed roost areas](https://nistara.github.io/Tanzania-fruit-bat-study/05_eobs-forage.html)
 
-7. [Compiling information about roosts and cumulative distances flown](https://nistara.github.io/Tanzania-fruit-bat-study/06_eobs-gps-info.html)
+7. [Compiling information about roosts and cumulative distances flown for e-obs tags](https://nistara.github.io/Tanzania-fruit-bat-study/06_eobs-gps-info.html)
 
 8. [Compiling information for Argos tags](https://nistara.github.io/Tanzania-fruit-bat-study/07_lotek-gps.html)
 
