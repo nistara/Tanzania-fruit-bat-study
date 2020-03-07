@@ -1,5 +1,5 @@
 ---
-title: "Identify roosts further subset flying points"
+title: "Getting distances from urban built-up and protected areas"
 output:
   html_document:
     toc: true
@@ -142,7 +142,7 @@ writeOGR(wdpa_export, dsn="data/gis/WDPA/", layer="wdpa_prune",
 
 <br>
 
-# GDAL and GRASS code for calcuting distances
+# GDAL and GRASS code for calculating distances
 
 #### GDAL code
 ```sh
@@ -307,7 +307,7 @@ mapply(cbind, guf_dist, "site" = names(dist_l), SIMPLIFY=F) %>% rbindlist
 
 guf_ind_bat = lapply(dist_l, function(df) {
     df_summary = df %>%
-        select(tagID, dist_guf) %>%
+        dplyr::select(tagID, dist_guf) %>%
         group_by(tagID) %>%
         summarize(dist_100 = sum(dist_guf <= 100),
                all_forage = n(),
