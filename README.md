@@ -21,3 +21,6 @@
 
 10. [Code for making plot for acceleration classification and a single foraging night](https://nistara.github.io/Tanzania-fruit-bat-study/R/09_acc-gps-forage_plots.nb.html)
 
+
+## Video of bat K5209's flight path
+<video src="https://youtu.be/6z_K9qc_2hY" width="320" height="200" controls preload></video>
