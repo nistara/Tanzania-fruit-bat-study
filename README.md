@@ -1,5 +1,6 @@
 # Code for paper
 
+The functions written for this code are provided [here](https://nistara.github.io/Tanzania-fruit-bat-study/R/00_fxns.html)
 
 1. [Classification of GPS fixes using aceleration data](https://nistara.github.io/Tanzania-fruit-bat-study/R/01_eobs-classify-acc-gps.html) 
 
