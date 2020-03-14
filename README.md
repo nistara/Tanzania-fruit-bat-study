@@ -1,4 +1,6 @@
-# Code for paper
+# Fruit bats in flight: A look into the movements of the ecologically important _Eidolon helvum_ in Tanzania
+
+## Code for paper
 
 The functions written for this code are provided [here](https://nistara.github.io/Tanzania-fruit-bat-study/R/00_fxns.html)
 
