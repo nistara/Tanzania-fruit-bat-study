@@ -22,7 +22,7 @@ The functions written for this code are provided [here](https://nistara.github.i
 
 9. [Calculating distances from urban built-up and protected areas](https://nistara.github.io/Tanzania-fruit-bat-study/R/08_guf-wdpa.html)
 
-10. [Code for making plot for acceleration classification and a single foraging night](https://nistara.github.io/Tanzania-fruit-bat-study/R/09_acc-gps-forage_plots.nb.html)
+10. [Code for making plot for acceleration classification and a single foraging night](https://nistara.github.io/Tanzania-fruit-bat-study/R/09_acc-gps-forage_plots.html)
 
 
 <br><br><br>
