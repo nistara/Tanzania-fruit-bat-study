@@ -2,9 +2,7 @@
 
 Randhawa, N., Bird, B.H., VanWormer, E. et al. Fruit bats in flight: a look into the movements of the ecologically important Eidolon helvum in Tanzania. One Health Outlook 2, 16 (2020). https://doi.org/10.1186/s42522-020-00020-9
 
-## Code for paper
-
-Functions used in this code are provided [here](https://nistara.github.io/Tanzania-fruit-bat-study/R/00_fxns.html)
+Functions used in the code below are provided [here](https://nistara.github.io/Tanzania-fruit-bat-study/R/00_fxns.html)
 
 1. [Classification of GPS fixes using aceleration data](https://nistara.github.io/Tanzania-fruit-bat-study/R/01_eobs-classify-acc-gps.html) 
 
