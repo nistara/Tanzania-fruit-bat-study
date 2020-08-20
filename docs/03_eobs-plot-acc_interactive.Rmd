@@ -1,0 +1,33 @@
+---
+title: "Interactive plots of a subset of acc data"
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+    theme: cerulean
+    highlight: zenburn
+    self_contained: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    echo = TRUE,
+    comment= NA)
+```
+
+
+- [Bat K5309](https://nistara.github.io/Tanzania-fruit-bat-study/docs/interactive_plots/K5309.html)
+
+- [Bat K5310](https://nistara.github.io/Tanzania-fruit-bat-study/docs/interactive_plots/K5310.html)
+
+- [Bat K5311](https://nistara.github.io/Tanzania-fruit-bat-study/docs/interactive_plots/K5311.html)
+
+- [Bat K5312](https://nistara.github.io/Tanzania-fruit-bat-study/docs/interactive_plots/K5312.html)
+
+- [Bat K5313](https://nistara.github.io/Tanzania-fruit-bat-study/docs/interactive_plots/K5313.html)
+
+- [Bat K5315](https://nistara.github.io/Tanzania-fruit-bat-study/docs/interactive_plots/K5315.html)
+
+- [Bat K5317](https://nistara.github.io/Tanzania-fruit-bat-study/docs/interactive_plots/K5317.html)
+
+- [Bat K5319](https://nistara.github.io/Tanzania-fruit-bat-study/docs/interactive_plots/K5319.html)
