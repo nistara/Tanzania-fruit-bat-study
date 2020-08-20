@@ -32,7 +32,8 @@ Functions used in this code are provided [here](https://nistara.github.io/Tanzan
 
 <br><br>
 
-Authors: Nistara Randhawa [1], Brian H. Bird [1], Elizabeth VanWormer [2], Zikankuba Sijali [3], Christopher Kilonzo [1], Alphonce Msigwa [4], Abel B. Ekiri [5], Aziza Samson [3], Jonathan H. Epstein [6], David J. Wolking [1], Woutrina A. Smith [1], Beatriz Martínez-López [7], Rudovick Kazwala [3] and Jonna A. K. Mazet [1]
+## Author information
+Nistara Randhawa [1], Brian H. Bird [1], Elizabeth VanWormer [2], Zikankuba Sijali [3], Christopher Kilonzo [1], Alphonce Msigwa [4], Abel B. Ekiri [5], Aziza Samson [3], Jonathan H. Epstein [6], David J. Wolking [1], Woutrina A. Smith [1], Beatriz Martínez-López [7], Rudovick Kazwala [3] and Jonna A. K. Mazet [1]
 
 [1] Karen C. Drayer Wildlife Health Center, One Health Institute, School of Veterinary Medicine, University of California, Davis, CA, USA.   
 [2] School of Veterinary Medicine and Biomedical Sciences, School of Natural Resources, University of Nebraska, Lincoln, NE, USA.    
