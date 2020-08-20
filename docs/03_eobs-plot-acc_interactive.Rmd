@@ -1,5 +1,5 @@
 ---
-title: "Interactive plots of a subset of acc data"
+title: "Interactive plots GPS and acceleration data"
 output:
   html_document:
     toc: true
@@ -15,6 +15,7 @@ knitr::opts_chunk$set(
     comment= NA)
 ```
 
+These are based on a subset of acceleration data.
 
 - [Bat K5309](https://nistara.github.io/Tanzania-fruit-bat-study/docs/interactive_plots/K5309.html)
 
