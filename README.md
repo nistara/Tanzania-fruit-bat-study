@@ -1,6 +1,6 @@
 # Fruit bats in flight: A look into the movements of the ecologically important _Eidolon helvum_ in Tanzania
 
-Randhawa, N., Bird, B.H., VanWormer, E. et al. Fruit bats in flight: a look into the movements of the ecologically important Eidolon helvum in Tanzania. One Health Outlook 2, 16 (2020). https://doi.org/10.1186/s42522-020-00020-9
+Randhawa, N., Bird, B.H., VanWormer, E. et al. Fruit bats in flight: a look into the movements of the ecologically important Eidolon helvum in Tanzania. One Health Outlook 2, 16 (2020). [https://doi.org/10.1186/s42522-020-00020-9](https://doi.org/10.1186/s42522-020-00020-9)
 
 Functions used in this code are provided [here](https://nistara.github.io/Tanzania-fruit-bat-study/docs/00_fxns.html).
 
@@ -8,9 +8,9 @@ Functions used in this code are provided [here](https://nistara.github.io/Tanzan
 
 2. [Comparing GPS fix classification by different acceleration axes](https://nistara.github.io/Tanzania-fruit-bat-study/docs/02_eobs-acc-compare.html) 
 
-3. [Plots of GPS fix classification for each bat](https://nistara.github.io/Tanzania-fruit-bat-study/docs/03_eobs-plot-acc.html)
+3. [Plots of acceleration-informed GPS fix classification for each bat](https://nistara.github.io/Tanzania-fruit-bat-study/docs/03_eobs-plot-acc.html)
 
-4. [Interactive versions of the above plots](https://nistara.github.io/Tanzania-fruit-bat-study/docs/03_eobs-plot-acc_interactive.html)
+4. [Interactive versions of the acceleration-informed GPS plots above](https://nistara.github.io/Tanzania-fruit-bat-study/docs/03_eobs-plot-acc_interactive.html)
 
 5. [Calculation of home ranges](https://nistara.github.io/Tanzania-fruit-bat-study/docs/04_eobs-home-range.html)
 
@@ -27,7 +27,7 @@ Functions used in this code are provided [here](https://nistara.github.io/Tanzan
 
 <br><br>
 
-### Video of bat K5309's flight path
+### Video of Bat K5309's flight path
 <iframe width="600" height="400" src="https://www.youtube.com/embed/6z_K9qc_2hY" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 <br><br>
