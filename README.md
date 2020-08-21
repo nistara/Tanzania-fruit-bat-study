@@ -35,10 +35,10 @@ Functions used in this code are provided [here](https://nistara.github.io/Tanzan
 ## Author information
 Nistara Randhawa [1], Brian H. Bird [1], Elizabeth VanWormer [2], Zikankuba Sijali [3], Christopher Kilonzo [1], Alphonce Msigwa [4], Abel B. Ekiri [5], Aziza Samson [3], Jonathan H. Epstein [6], David J. Wolking [1], Woutrina A. Smith [1], Beatriz Martínez-López [7], Rudovick Kazwala [3] and Jonna A. K. Mazet [1]
 
-[1] Karen C. Drayer Wildlife Health Center, One Health Institute, School of Veterinary Medicine, University of California, Davis, CA, USA.   
-[2] School of Veterinary Medicine and Biomedical Sciences, School of Natural Resources, University of Nebraska, Lincoln, NE, USA.    
-[3] Department of Veterinary Medicine and Public Health, College of Veterinary Medicine and Biomedical Sciences, Sokoine University of Agriculture, Morogoro, Tanzania.   
-[4] Tanzania National Park, Burigi-Chato National Park, Karagwe-Kagera, Tanzania.    
-[5] School of Veterinary Medicine, University of Surrey, Guildford, UK.    
-[6] EcoHealth Alliance, New York, NY, USA.    
-[7] Center for Animal Disease Modeling and Surveillance, School of Veterinary Medicine, University of California, Davis, CA, USA. 
+1. Karen C. Drayer Wildlife Health Center, One Health Institute, School of Veterinary Medicine, University of California, Davis, CA, USA.   
+2. School of Veterinary Medicine and Biomedical Sciences, School of Natural Resources, University of Nebraska, Lincoln, NE, USA.    
+3. Department of Veterinary Medicine and Public Health, College of Veterinary Medicine and Biomedical Sciences, Sokoine University of Agriculture, Morogoro, Tanzania.   
+4. Tanzania National Park, Burigi-Chato National Park, Karagwe-Kagera, Tanzania.    
+5. School of Veterinary Medicine, University of Surrey, Guildford, UK.    
+6. EcoHealth Alliance, New York, NY, USA.    
+7. Center for Animal Disease Modeling and Surveillance, School of Veterinary Medicine, University of California, Davis, CA, USA. 
